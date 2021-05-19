@@ -1,0 +1,61 @@
+# CAVEATES:
+#   docker-compose up --force-recreate does not recreate volumes, so you may still
+#   be using the volume from previous container. Upgrade might take a different route.
+version: '3.7'
+
+services:
+  db:
+    image: mariadb:10.2
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=ojs
+      - MYSQL_DATABASE=ojs
+      - MYSQL_USER=ojs
+      - MYSQL_PASSWORD=ojs
+    networks:
+      - ojs_network
+    volumes:
+      - dbvolume:/var/lib/mysql
+
+  app:
+    image: ojs-nginx:latest
+    restart: always
+    networks:
+      - ojs_network
+    volumes:
+      - appvolume:/var/www/html
+      - mediavolume:/var/www/files
+      - ./config.inc.php:/var/www/html/config.inc.php
+      # - ./php.ini:/usr/local/etc/php/php.ini
+    depends_on:
+      - db
+
+  nginx:
+    image: nginx:1.19.2-alpine
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - ojs_network
+    volumes:
+      - appvolume:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+
+  # smtp:
+  #   image: rordi/docker-mailcatcher
+  #   restart: always
+  #   ports:
+  #     - 1080:1080
+  #   networks:
+  #     - ojs_network
+
+volumes:
+  appvolume:
+  mediavolume:
+  dbvolume:
+
+networks:
+  ojs_network:
+    driver: bridge
