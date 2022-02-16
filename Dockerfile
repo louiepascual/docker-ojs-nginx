@@ -1,7 +1,7 @@
-FROM php:7.4-fpm-alpine
+FROM php:7.4.19-fpm-alpine
 LABEL maintainer="louieepascual@gmail.com"
 
-ENV OJS_VERSION=3_3_0-3
+ENV OJS_VERSION=3_3_0-8
 
 WORKDIR /var/www/html
 
